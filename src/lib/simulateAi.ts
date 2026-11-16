@@ -1,6 +1,13 @@
-import { Score } from './types';
+// Résultat de la simulation : les 4 notes sont toujours présentes (jamais null)
+export interface AiScoring {
+  impact: number;
+  feasibility: number;
+  strategic_fit: number;
+  innovation: number;
+  justification: string;
+}
 
-export function simulateAiScoring(title: string, description: string, budgetEur: number | null): Omit<Score, 'idea_id' | 'source'> & { justification: string } {
+export function simulateAiScoring(title: string, description: string, budgetEur: number | null): AiScoring {
   const text = (title + ' ' + description).toLowerCase();
 
   if (text.includes('café') || text.includes('machine à café') || text.includes('baby-foot')) {
@@ -21,7 +28,7 @@ export function simulateAiScoring(title: string, description: string, budgetEur:
   if (text.includes('client') || text.includes('chiffre d\'affaires') || text.includes('productivité') || text.includes('sécurité')) {
     impact = 4;
   }
-  if (text.includes('ia') || text.includes('automatisation') || text.includes('plateforme') || text.includes('capteurs')) {
+  if (/\bia\b/.test(text) || text.includes('automatisation') || text.includes('plateforme') || text.includes('capteurs')) {
     innovation = 4;
   }
   if (budgetEur !== null && budgetEur > 50000) {
