@@ -15,9 +15,9 @@ export function LogoutButton() {
     <button
       type="button"
       onClick={handleLogout}
-      className="rounded-md border border-black/20 px-3 py-1.5 text-sm font-medium hover:bg-black/5 dark:border-white/25 dark:hover:bg-white/10"
+      className="text-xs text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition"
     >
-      Se déconnecter
+      Déconnexion
     </button>
   );
 }

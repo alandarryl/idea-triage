@@ -44,19 +44,19 @@ export function ImportButton() {
         imported: data.imported ?? 0,
         skipped: data.skipped ?? [],
       });
-      router.refresh(); // recharge la liste affichée
+      router.refresh();
     } catch {
       setStatus({
         kind: 'error',
-        message: 'Impossible de joindre le serveur. Vérifiez votre connexion.',
+        message: 'Impossible de joindre le serveur.',
       });
     } finally {
-      input.value = ''; // permet de re-sélectionner le même fichier
+      input.value = '';
     }
   }
 
   return (
-    <div className="flex flex-col items-end gap-2">
+    <div className="relative flex items-center gap-2">
       <input
         ref={inputRef}
         type="file"
@@ -68,30 +68,19 @@ export function ImportButton() {
         type="button"
         onClick={() => inputRef.current?.click()}
         disabled={status.kind === 'loading'}
-        className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
+        className="rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-900 shadow-2xs hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800 transition"
       >
-        {status.kind === 'loading' ? 'Import en cours…' : 'Importer un fichier CSV'}
+        {status.kind === 'loading' ? 'Import…' : 'Importer CSV'}
       </button>
 
-      <div aria-live="polite" className="max-w-md text-right text-sm">
-        {status.kind === 'success' && (
-          <div>
-            <p className="text-green-700 dark:text-green-400">
-              {status.imported} idée(s) importée(s).
-            </p>
-            {status.skipped.length > 0 && (
-              <ul className="mt-1 text-amber-700 dark:text-amber-400">
-                {status.skipped.map((message) => (
-                  <li key={message}>{message}</li>
-                ))}
-              </ul>
-            )}
-          </div>
-        )}
-        {status.kind === 'error' && (
-          <p className="text-red-700 dark:text-red-400">{status.message}</p>
-        )}
-      </div>
+      {status.kind === 'success' && (
+        <span className="text-xs text-emerald-600 dark:text-emerald-400">
+          {status.imported} importés
+        </span>
+      )}
+      {status.kind === 'error' && (
+        <span className="text-xs text-rose-600 dark:text-rose-400">{status.message}</span>
+      )}
     </div>
   );
 }

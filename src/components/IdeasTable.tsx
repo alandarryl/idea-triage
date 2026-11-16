@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import type { Idea, IdeaWithScore, Score } from '@/lib/types';
 import { ScoreForm } from './ScoreForm';
+import { ShortlistExportButton } from './ShortlistExportButton';
 import { averageRating, formatAverage } from '@/lib/scoring';
 import {
   filterIdeas,
@@ -20,8 +21,8 @@ const euro = new Intl.NumberFormat('fr-FR', {
 
 function formatBudget(idea: Idea): string {
   if (idea.budget_eur !== null) return euro.format(idea.budget_eur);
-  if (idea.budget_raw !== null) return `Non interprété (« ${idea.budget_raw} »)`;
-  return 'Non renseigné';
+  if (idea.budget_raw !== null) return `« ${idea.budget_raw} »`;
+  return '—';
 }
 
 function formatDate(iso: string): string {
@@ -29,16 +30,21 @@ function formatDate(iso: string): string {
   return `${day}/${month}/${year}`;
 }
 
-function NoteCell({ score }: { score: Score | null }) {
+function NoteBadge({ score }: { score: Score | null }) {
   const average = score ? averageRating(score) : null;
   if (average === null) {
-    return <span className="opacity-60">{score ? 'Incomplète' : 'Non notée'}</span>;
+    return <span className="text-xs text-zinc-400 dark:text-zinc-600">—</span>;
   }
-  return <span className="font-medium">{formatAverage(average)} / 5</span>;
+  return (
+    <span className="inline-flex items-center font-mono text-xs font-medium text-zinc-900 dark:text-zinc-100">
+      {formatAverage(average)}
+      <span className="text-[10px] text-zinc-400 ml-0.5">/5</span>
+    </span>
+  );
 }
 
-const selectClass =
-  'rounded-md border border-black/20 bg-transparent px-3 py-2 text-sm dark:border-white/25';
+const inputClass =
+  'rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-xs text-zinc-900 shadow-2xs transition placeholder:text-zinc-400 focus:border-zinc-900 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-zinc-100';
 
 export function IdeasTable({ ideas }: { ideas: IdeaWithScore[] }) {
   const [filters, setFilters] = useState<IdeaFilters>(EMPTY_FILTERS);
@@ -52,163 +58,176 @@ export function IdeasTable({ ideas }: { ideas: IdeaWithScore[] }) {
   const visible = useMemo(() => filterIdeas(ideas, filters), [ideas, filters]);
   const isFiltering = JSON.stringify(filters) !== JSON.stringify(EMPTY_FILTERS);
   const scoredCount = ideas.filter(
-  (i) => i.score !== null && averageRating(i.score) !== null,
-).length;
+    (i) => i.score !== null && averageRating(i.score) !== null,
+  ).length;
 
   function update(field: keyof IdeaFilters, value: string) {
     setFilters((current) => ({ ...current, [field]: value }));
   }
 
-  // Fonction de bascule à placer dans IdeasTable
-async function handleShortlistToggle(ideaId: string, currentStatus: boolean) {
-  await fetch('/api/shortlist', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ideaId, shortlisted: !currentStatus }),
-  });
-  window.location.reload();
-}
+  async function handleShortlistToggle(ideaId: string, currentStatus: boolean) {
+    await fetch('/api/shortlist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ideaId, shortlisted: !currentStatus }),
+    });
+    window.location.reload();
+  }
 
   if (ideas.length === 0) {
     return (
-      <div className="rounded-lg border border-dashed border-black/20 p-10 text-center dark:border-white/25">
-        <p className="font-medium">Aucune idée pour l&apos;instant.</p>
-        <p className="mt-1 text-sm opacity-70">
-          Importez le fichier CSV exporté du formulaire pour commencer.
-        </p>
+      <div className="rounded-xl border border-dashed border-zinc-200 bg-white p-16 text-center dark:border-zinc-800 dark:bg-zinc-900">
+        <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">Aucun dossier chargé</p>
+        <p className="mt-1 text-xs text-zinc-400">Importez le fichier CSV pour commencer l&apos;instruction.</p>
       </div>
     );
   }
 
   return (
-    <section>
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <input
-          type="search"
-          value={filters.search}
-          onChange={(e) => update('search', e.target.value)}
-          placeholder="Rechercher dans les idées…"
-          aria-label="Rechercher dans les idées"
-          className={`${selectClass} w-64`}
-        />
-        <select
-          value={filters.direction}
-          onChange={(e) => update('direction', e.target.value)}
-          aria-label="Filtrer par direction"
-          className={selectClass}
-        >
-          <option value="">Toutes les directions</option>
-          {directions.map((d) => (
-            <option key={d} value={d}>{d}</option>
-          ))}
-        </select>
-        <select
-          value={filters.theme}
-          onChange={(e) => update('theme', e.target.value)}
-          aria-label="Filtrer par thème"
-          className={selectClass}
-        >
-          <option value="">Tous les thèmes</option>
-          {themes.map((t) => (
-            <option key={t} value={t}>{t}</option>
-          ))}
-          {hasMissingTheme && <option value={NOT_SET}>Non renseigné</option>}
-        </select>
-        <select
-          value={filters.site}
-          onChange={(e) => update('site', e.target.value)}
-          aria-label="Filtrer par site"
-          className={selectClass}
-        >
-          <option value="">Tous les sites</option>
-          {sites.map((s) => (
-            <option key={s} value={s}>{s}</option>
-          ))}
-          {hasMissingSite && <option value={NOT_SET}>Non renseigné</option>}
-        </select>
-        {isFiltering && (
-          <button
-            type="button"
-            onClick={() => setFilters(EMPTY_FILTERS)}
-            className="text-sm underline"
+    <section className="space-y-6">
+      {/* Contrôles de filtrage épurés */}
+      <div className="flex flex-col gap-3 rounded-xl border border-zinc-200/80 bg-white p-4 shadow-2xs dark:border-zinc-800/80 dark:bg-zinc-900 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <input
+            type="search"
+            value={filters.search}
+            onChange={(e) => update('search', e.target.value)}
+            placeholder="Rechercher par mot-clé…"
+            aria-label="Rechercher dans les idées"
+            className={`${inputClass} w-64`}
+          />
+          <select
+            value={filters.direction}
+            onChange={(e) => update('direction', e.target.value)}
+            aria-label="Filtrer par direction"
+            className={inputClass}
           >
-            Réinitialiser les filtres
-          </button>
-        )}
+            <option value="">Toutes les directions</option>
+            {directions.map((d) => (
+              <option key={d} value={d}>{d}</option>
+            ))}
+          </select>
+          <select
+            value={filters.theme}
+            onChange={(e) => update('theme', e.target.value)}
+            aria-label="Filtrer par thème"
+            className={inputClass}
+          >
+            <option value="">Tous les thèmes</option>
+            {themes.map((t) => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+            {hasMissingTheme && <option value={NOT_SET}>Non renseigné</option>}
+          </select>
+          <select
+            value={filters.site}
+            onChange={(e) => update('site', e.target.value)}
+            aria-label="Filtrer par site"
+            className={inputClass}
+          >
+            <option value="">Tous les sites</option>
+            {sites.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+            {hasMissingSite && <option value={NOT_SET}>Non renseigné</option>}
+          </select>
+          {isFiltering && (
+            <button
+              type="button"
+              onClick={() => setFilters(EMPTY_FILTERS)}
+              className="text-xs text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition"
+            >
+              Réinitialiser
+            </button>
+          )}
+        </div>
+
+        <div className="flex items-center justify-between border-t border-zinc-100 pt-3 dark:border-zinc-800/60 lg:border-t-0 lg:pt-0">
+          <span className="text-xs text-zinc-400 font-mono">
+            {visible.length} / {ideas.length} dossiers · {scoredCount} notés
+          </span>
+          <ShortlistExportButton items={ideas} />
+        </div>
       </div>
 
-      <p className="mb-2 text-sm opacity-70">
-        {visible.length} idée(s) affichée(s) sur {ideas.length} · {scoredCount} entièrement notée(s)
-      </p>
-
+      {/* Tableau minimaliste type reporting de conseil */}
       {visible.length === 0 ? (
-        <p className="rounded-lg border border-black/10 p-6 text-center dark:border-white/20">
-          Aucune idée ne correspond à ces filtres.
-        </p>
+        <div className="rounded-xl border border-zinc-200 bg-white p-16 text-center text-xs text-zinc-400 dark:border-zinc-800 dark:bg-zinc-900">
+          Aucun dossier ne correspond aux critères sélectionnés.
+        </div>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-black/10 dark:border-white/20">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-black/5 dark:bg-white/10">
+        <div className="overflow-hidden rounded-xl border border-zinc-200/80 bg-white shadow-2xs dark:border-zinc-800/80 dark:bg-zinc-900">
+          <table className="w-full text-left text-xs">
+            <thead className="border-b border-zinc-100 bg-zinc-50/50 font-medium text-zinc-400 uppercase tracking-wider dark:border-zinc-800/80 dark:bg-zinc-900/50">
               <tr>
-                <th className="px-3 py-2 font-medium">Shortlist</th>
-                <th className="px-3 py-2 font-medium">N°</th>
-                <th className="px-3 py-2 font-medium">Idée</th>
-                <th className="px-3 py-2 font-medium">Direction</th>
-                <th className="px-3 py-2 font-medium">Site</th>
-                <th className="px-3 py-2 font-medium">Thème</th>
-                <th className="px-3 py-2 font-medium">Budget</th>
-                <th className="px-3 py-2 font-medium">Note</th>
-                <th className="px-3 py-2 font-medium">Déposée le</th>
+                <th className="w-12 px-4 py-3 text-center">Retenu</th>
+                <th className="w-20 px-4 py-3 font-mono">Réf.</th>
+                <th className="px-4 py-3">Intitulé du projet</th>
+                <th className="px-4 py-3">Direction</th>
+                <th className="px-4 py-3">Thème / Site</th>
+                <th className="px-4 py-3 text-right">Budget</th>
+                <th className="px-4 py-3 text-center">Note</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/60">
               {visible.map((idea) => (
-                <tr key={idea.id} className="border-t border-black/10 align-top dark:border-white/20">
-                  <td className="px-3 py-2 text-center">
+                <tr key={idea.id} className="group transition hover:bg-zinc-50/60 dark:hover:bg-zinc-800/20">
+                  <td className="px-4 py-3.5 text-center align-middle">
                     <input
                       type="checkbox"
                       checked={idea.shortlisted}
                       onChange={() => void handleShortlistToggle(idea.id, idea.shortlisted)}
                       aria-label={`Short-listé l'idée ${idea.id}`}
-                      className="h-4 w-4 cursor-pointer rounded border-black/20"
+                      className="h-3.5 w-3.5 rounded border-zinc-300 text-zinc-900 focus:ring-0 dark:border-zinc-700 dark:bg-zinc-800 cursor-pointer"
                     />
                   </td>
-                  <td className="whitespace-nowrap px-3 py-2 opacity-70">{idea.id}</td>
-                  <td className="px-3 py-2">
-                    <details>
-                      <summary className="cursor-pointer font-medium">
-                        {idea.title}
-                        {idea.import_warnings.length > 0 && (
-                          <span
-                            title={idea.import_warnings.join('\n')}
-                            className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-xs font-normal text-amber-900"
-                          >
-                            à vérifier
-                          </span>
-                        )}
+                  <td className="px-4 py-3.5 align-middle font-mono text-zinc-400">{idea.id}</td>
+                  <td className="px-4 py-3.5 align-middle">
+                    <details className="group/details">
+                      <summary className="cursor-pointer list-none font-medium text-zinc-900 hover:text-zinc-600 dark:text-zinc-100 dark:hover:text-zinc-300">
+                        <div className="flex items-center gap-2">
+                          <span>{idea.title}</span>
+                          {idea.import_warnings.length > 0 && (
+                            <span
+                              title={idea.import_warnings.join('\n')}
+                              className="rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-normal text-amber-700 dark:bg-amber-950/40 dark:text-amber-400"
+                            >
+                              Anomalie
+                            </span>
+                          )}
+                        </div>
                       </summary>
-                      <div className="mt-2 max-w-prose space-y-2">
-                        <p>{idea.description}</p>
-                        <p>
-                          <span className="font-medium">Bénéfices attendus : </span>
-                          {idea.expected_benefits ?? 'Non renseigné'}
-                        </p>
-                        <p className="opacity-70">
-                          Déposée par {idea.first_name} {idea.last_name}
-                        </p>
-                        {idea.import_warnings.map((w) => (
-                          <p key={w} className="text-amber-700 dark:text-amber-400">⚠ {w}</p>
-                        ))}
-                        <ScoreForm ideaId={idea.id} score={idea.score} />
+                      <div className="mt-3 space-y-3 rounded-lg border border-zinc-100 bg-zinc-50/50 p-4 text-xs dark:border-zinc-800 dark:bg-zinc-950/40">
+                        <div>
+                          <span className="font-medium text-zinc-700 dark:text-zinc-300">Description</span>
+                          <p className="mt-1 text-zinc-600 dark:text-zinc-400 leading-relaxed">{idea.description}</p>
+                        </div>
+                        {idea.expected_benefits && (
+                          <div>
+                            <span className="font-medium text-zinc-700 dark:text-zinc-300">Bénéfices attendus</span>
+                            <p className="mt-1 text-zinc-600 dark:text-zinc-400">{idea.expected_benefits}</p>
+                          </div>
+                        )}
+                        <div className="text-[11px] text-zinc-400">
+                          Porteur : {idea.first_name} {idea.last_name} — Déposé le {formatDate(idea.submitted_at)}
+                        </div>
+                        <div className="border-t border-zinc-200/60 pt-3 dark:border-zinc-800">
+                          <ScoreForm ideaId={idea.id} score={idea.score} />
+                        </div>
                       </div>
                     </details>
                   </td>
-                  <td className="px-3 py-2">{idea.direction}</td>
-                  <td className="px-3 py-2">{idea.site ?? <span className="opacity-60">Non renseigné</span>}</td>
-                  <td className="px-3 py-2">{idea.theme ?? <span className="opacity-60">Non renseigné</span>}</td>
-                  <td className="whitespace-nowrap px-3 py-2">{formatBudget(idea)}</td>
-                  <td className="whitespace-nowrap px-3 py-2"><NoteCell score={idea.score} /></td>
-                  <td className="whitespace-nowrap px-3 py-2">{formatDate(idea.submitted_at)}</td>
+                  <td className="px-4 py-3.5 align-middle text-zinc-600 dark:text-zinc-400">{idea.direction}</td>
+                  <td className="px-4 py-3.5 align-middle">
+                    <div className="text-zinc-900 dark:text-zinc-100">{idea.theme ?? <span className="text-zinc-400">—</span>}</div>
+                    <div className="text-[11px] text-zinc-400">{idea.site ?? 'Siège'}</div>
+                  </td>
+                  <td className="px-4 py-3.5 align-middle text-right font-mono text-zinc-600 dark:text-zinc-400">
+                    {formatBudget(idea)}
+                  </td>
+                  <td className="px-4 py-3.5 align-middle text-center">
+                    <NoteBadge score={idea.score} />
+                  </td>
                 </tr>
               ))}
             </tbody>
