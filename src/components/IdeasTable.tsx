@@ -59,6 +59,16 @@ export function IdeasTable({ ideas }: { ideas: IdeaWithScore[] }) {
     setFilters((current) => ({ ...current, [field]: value }));
   }
 
+  // Fonction de bascule à placer dans IdeasTable
+async function handleShortlistToggle(ideaId: string, currentStatus: boolean) {
+  await fetch('/api/shortlist', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ideaId, shortlisted: !currentStatus }),
+  });
+  window.location.reload();
+}
+
   if (ideas.length === 0) {
     return (
       <div className="rounded-lg border border-dashed border-black/20 p-10 text-center dark:border-white/25">
@@ -140,6 +150,7 @@ export function IdeasTable({ ideas }: { ideas: IdeaWithScore[] }) {
           <table className="w-full text-left text-sm">
             <thead className="bg-black/5 dark:bg-white/10">
               <tr>
+                <th className="px-3 py-2 font-medium">Shortlist</th>
                 <th className="px-3 py-2 font-medium">N°</th>
                 <th className="px-3 py-2 font-medium">Idée</th>
                 <th className="px-3 py-2 font-medium">Direction</th>
@@ -153,6 +164,15 @@ export function IdeasTable({ ideas }: { ideas: IdeaWithScore[] }) {
             <tbody>
               {visible.map((idea) => (
                 <tr key={idea.id} className="border-t border-black/10 align-top dark:border-white/20">
+                  <td className="px-3 py-2 text-center">
+                    <input
+                      type="checkbox"
+                      checked={idea.shortlisted}
+                      onChange={() => void handleShortlistToggle(idea.id, idea.shortlisted)}
+                      aria-label={`Short-listé l'idée ${idea.id}`}
+                      className="h-4 w-4 cursor-pointer rounded border-black/20"
+                    />
+                  </td>
                   <td className="whitespace-nowrap px-3 py-2 opacity-70">{idea.id}</td>
                   <td className="px-3 py-2">
                     <details>
