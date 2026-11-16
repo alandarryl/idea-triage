@@ -1,9 +1,14 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
+
 export function LogoutButton() {
+  const router = useRouter();
+
   const handleLogout = () => {
     document.cookie = 'idea_triage_auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-    window.location.href = '/login';
+    router.push('/login');
+    router.refresh();
   };
 
   return (
