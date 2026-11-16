@@ -52,6 +52,27 @@ export function ScoreForm({ ideaId, score }: { ideaId: string; score: Score | nu
     }
   }
 
+  async function handleAiPreScore() {
+    setStatus({ kind: 'saving' });
+    try {
+      const res = await fetch('/api/ai-score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ideaId }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setStatus({ kind: 'error', message: data.error ?? "La pré-notation IA a échoué." });
+        return;
+      }
+
+      window.location.reload();
+    } catch {
+      setStatus({ kind: 'error', message: 'Impossible de joindre le serveur pour la pré-note.' });
+    }
+  }
+
   return (
     <form
       onSubmit={(event) => {
@@ -60,7 +81,16 @@ export function ScoreForm({ ideaId, score }: { ideaId: string; score: Score | nu
       }}
       className="mt-3 space-y-3 rounded-md border border-black/10 p-3 dark:border-white/20"
     >
-      <p className="text-xs opacity-70">Échelle : 1 = très faible, 5 = très fort.</p>
+      <div className="flex items-center justify-between">
+        <p className="text-xs opacity-70">Échelle : 1 = très faible, 5 = très fort.</p>
+        <button
+          type="button"
+          onClick={() => void handleAiPreScore()}
+          className="rounded-md border border-blue-600 px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30"
+        >
+          🤖 Pré-noter par l'IA
+        </button>
+      </div>
 
       {CRITERIA.map(({ key, label, hint }) => (
         <fieldset key={key}>
