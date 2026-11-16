@@ -35,3 +35,7 @@ export interface DuplicatePair {
   similarity: number;
   status: DuplicateStatus;
 }
+
+
+// Une idée avec sa note (null tant qu'elle n'a pas été notée)
+export type IdeaWithScore = Idea & { score: Score | null };

@@ -1,12 +1,12 @@
 import { Suspense } from 'react';
-import { getIdeas } from '@/lib/ideas';
+import { getIdeasWithScores } from '@/lib/ideas';
 import { IdeasTable } from '@/components/IdeasTable';
 import { ImportButton } from '@/components/ImportButton';
 
 // Composant serveur : lit les idées à chaque requête.
 // Il doit être entouré d'un <Suspense> (règle de Cache Components).
 async function IdeasSection() {
-  const ideas = await getIdeas();
+  const ideas = await getIdeasWithScores();
   return <IdeasTable ideas={ideas} />;
 }
 

@@ -23,7 +23,7 @@ function matchesOptional(value: string | null, filter: string): boolean {
   return value === filter;
 }
 
-export function filterIdeas(ideas: Idea[], filters: IdeaFilters): Idea[] {
+export function filterIdeas<T extends Idea>(ideas: T[], filters: IdeaFilters): T[] {
   const search = filters.search.trim().toLowerCase();
 
   return ideas.filter((idea) => {

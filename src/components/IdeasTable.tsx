@@ -1,7 +1,9 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import type { Idea } from '@/lib/types';
+import type { Idea, IdeaWithScore, Score } from '@/lib/types';
+import { ScoreForm } from './ScoreForm';
+import { averageRating, formatAverage } from '@/lib/scoring';
 import {
   filterIdeas,
   distinctValues,
@@ -27,10 +29,18 @@ function formatDate(iso: string): string {
   return `${day}/${month}/${year}`;
 }
 
+function NoteCell({ score }: { score: Score | null }) {
+  const average = score ? averageRating(score) : null;
+  if (average === null) {
+    return <span className="opacity-60">{score ? 'Incomplète' : 'Non notée'}</span>;
+  }
+  return <span className="font-medium">{formatAverage(average)} / 5</span>;
+}
+
 const selectClass =
   'rounded-md border border-black/20 bg-transparent px-3 py-2 text-sm dark:border-white/25';
 
-export function IdeasTable({ ideas }: { ideas: Idea[] }) {
+export function IdeasTable({ ideas }: { ideas: IdeaWithScore[] }) {
   const [filters, setFilters] = useState<IdeaFilters>(EMPTY_FILTERS);
 
   const directions = useMemo(() => distinctValues(ideas.map((i) => i.direction)), [ideas]);
@@ -41,6 +51,9 @@ export function IdeasTable({ ideas }: { ideas: Idea[] }) {
 
   const visible = useMemo(() => filterIdeas(ideas, filters), [ideas, filters]);
   const isFiltering = JSON.stringify(filters) !== JSON.stringify(EMPTY_FILTERS);
+  const scoredCount = ideas.filter(
+  (i) => i.score !== null && averageRating(i.score) !== null,
+).length;
 
   function update(field: keyof IdeaFilters, value: string) {
     setFilters((current) => ({ ...current, [field]: value }));
@@ -115,7 +128,7 @@ export function IdeasTable({ ideas }: { ideas: Idea[] }) {
       </div>
 
       <p className="mb-2 text-sm opacity-70">
-        {visible.length} idée(s) affichée(s) sur {ideas.length}
+        {visible.length} idée(s) affichée(s) sur {ideas.length} · {scoredCount} entièrement notée(s)
       </p>
 
       {visible.length === 0 ? (
@@ -133,6 +146,7 @@ export function IdeasTable({ ideas }: { ideas: Idea[] }) {
                 <th className="px-3 py-2 font-medium">Site</th>
                 <th className="px-3 py-2 font-medium">Thème</th>
                 <th className="px-3 py-2 font-medium">Budget</th>
+                <th className="px-3 py-2 font-medium">Note</th>
                 <th className="px-3 py-2 font-medium">Déposée le</th>
               </tr>
             </thead>
@@ -165,6 +179,7 @@ export function IdeasTable({ ideas }: { ideas: Idea[] }) {
                         {idea.import_warnings.map((w) => (
                           <p key={w} className="text-amber-700 dark:text-amber-400">⚠ {w}</p>
                         ))}
+                        <ScoreForm ideaId={idea.id} score={idea.score} />
                       </div>
                     </details>
                   </td>
@@ -172,6 +187,7 @@ export function IdeasTable({ ideas }: { ideas: Idea[] }) {
                   <td className="px-3 py-2">{idea.site ?? <span className="opacity-60">Non renseigné</span>}</td>
                   <td className="px-3 py-2">{idea.theme ?? <span className="opacity-60">Non renseigné</span>}</td>
                   <td className="whitespace-nowrap px-3 py-2">{formatBudget(idea)}</td>
+                  <td className="whitespace-nowrap px-3 py-2"><NoteCell score={idea.score} /></td>
                   <td className="whitespace-nowrap px-3 py-2">{formatDate(idea.submitted_at)}</td>
                 </tr>
               ))}
