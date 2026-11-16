@@ -2,9 +2,12 @@ import Papa from 'papaparse';
 import type { Idea } from './types';
 import { parseBudget } from './parseBudget';
 import { parseDate } from './parseDate';
+// Une idée telle qu'elle sort du CSV : sans le champ "shortlisted",
+// qui appartient à Camille et ne doit jamais être écrasé par un réimport.
+export type ParsedIdea = Omit<Idea, 'shortlisted'>;
 
 export interface ParsedCsv {
-  ideas: Idea[];
+    ideas: ParsedIdea[];
   errors: string[]; // lignes ignorées, avec la raison
 }
 
@@ -24,7 +27,7 @@ export function parseIdeasCsv(text: string): ParsedCsv {
     skipEmptyLines: true,
   });
 
-  const ideas: Idea[] = [];
+    const ideas: ParsedIdea[] = [];
   const errors: string[] = [];
 
   result.data.forEach((row, index) => {
@@ -76,7 +79,6 @@ export function parseIdeasCsv(text: string): ParsedCsv {
       budget_raw: budgetRaw,
       budget_eur: budgetEur,
       import_warnings: warnings,
-      shortlisted: false,
     });
   });
 
