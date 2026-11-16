@@ -2,12 +2,18 @@ import { Suspense } from 'react';
 import { getIdeasWithScores } from '@/lib/ideas';
 import { IdeasTable } from '@/components/IdeasTable';
 import { ImportButton } from '@/components/ImportButton';
+import { ShortlistExportButton } from '@/components/ShortlistExportButton';
 
-// Composant serveur : lit les idées à chaque requête.
-// Il doit être entouré d'un <Suspense> (règle de Cache Components).
 async function IdeasSection() {
   const ideas = await getIdeasWithScores();
-  return <IdeasTable ideas={ideas} />;
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-end">
+        <ShortlistExportButton items={ideas} />
+      </div>
+      <IdeasTable ideas={ideas} />
+    </div>
+  );
 }
 
 export default function Home() {
