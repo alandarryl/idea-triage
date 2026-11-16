@@ -88,7 +88,7 @@ export function ScoreForm({ ideaId, score }: { ideaId: string; score: Score | nu
           onClick={() => void handleAiPreScore()}
           className="rounded-md border border-blue-600 px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30"
         >
-          🤖 Pré-noter par l'IA
+          🤖 Pré-noter par l&apos;IA
         </button>
       </div>
 
