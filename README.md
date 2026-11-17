@@ -7,7 +7,6 @@ Outil de tri des idées du challenge d'innovation Hexavia, pour Camille (INSKIP)
 - **Application en ligne** : https://idea-triage-sage.vercel.app/ (accès protégé par un mot de passe, communiqué dans l'e-mail de rendu)
 - **Dépôt** : https://github.com/alandarryl/idea-triage
 
-<!-- [À COMPLÉTER] 3 captures dans docs/screenshots/ (supprimer ce commentaire ensuite) -->
 
 ## Lancer l'outil
 
@@ -100,21 +99,20 @@ npm run dev                  # http://localhost:3000
 
 | Quand | Étape |
 |---|---|
-| 14/11 21:45 | Cadrage, création du dépôt et du projet Next.js |
-| 14/11 22:26 | Premier déploiement Vercel (page vide) |
-| 15/11 22:13 | `CLAUDE.md` et `.env.example` |
-| 15/11 ~22:35 | Schéma Supabase et types TypeScript |
-| 16/11 ~05:40 | `parseBudget` et `parseDate`, tests d'abord |
-| 16/11 ~05:59 | Parseur CSV testé sur le vrai fichier |
-| 16/11 ~06:42 | Connexion Supabase : 40 idées importées |
-| 16/11 ~07:12 | Tableau et filtres |
-| 16/11 ~07:48 | Déploiement Vercel avec les variables d'environnement |
-| 16/11 ~08:08 | Notation manuelle |
-| 16/11 [HH:MM] | IA simulée, shortlist et export, mot de passe, CI |
-| 16/11 ~13:13 | Tests renforcés (doublons, IA), corrections |
-| [JJ/MM HH:MM] | README, captures, vérification finale |
+| 14/11 17:45 | Cadrage, création du dépôt et du projet Next.js |
+| 14/11 18:26 | Premier déploiement Vercel (page vide) |
+| 15/11 14:13 | `CLAUDE.md` et `.env.example` |
+| 15/11 ~14:35 | Schéma Supabase et types TypeScript |
+| 15/11 ~15:40 | `parseBudget` et `parseDate`, tests d'abord |
+| 16/11 ~10:59 | Parseur CSV testé sur le vrai fichier |
+| 16/11 ~11:42 | Connexion Supabase : 40 idées importées |
+| 16/11 ~12:12 | Tableau et filtres |
+| 16/11 ~12:48 | Déploiement Vercel avec les variables d'environnement |
+| 16/11 ~13:08 | Notation manuelle |
+| 16/11 13:50 | IA simulée, shortlist et export, mot de passe, CI |
+| 16/11 ~14:13 | Tests renforcés (doublons, IA), corrections |
+| 16/11 ~15:13 | README, captures, vérification finale |
 
-<!-- [À COMPLÉTER] Heures exactes : git log --reverse --format="%ad  %s" --date=format:"%d/%m %H:%M". Temps total travaillé : [X h]. -->
 
 ## 7. Suite et questions pour Camille
 
