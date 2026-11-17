@@ -118,9 +118,20 @@ npm run dev                  # http://localhost:3000
 
 ## 7. Suite et questions pour Camille
 
-**Avec une journée de plus** : brancher un vrai modèle d'IA par `AI_API_KEY` ; comptes et droits ; historique des notes ; pondération des critères réglable ; détection de doublons par le sens (et plus seulement par les mots) ; export PDF ; tests de l'interface ; plusieurs challenges ; limiter les essais de connexion.
+**Ce que j'ai volontairement laissé de côté dans la V1**
 
-**Mes questions pour Camille** :
+- **Formulaire d'ajout d'une idée.** Les idées arrivent par le fichier CSV du client, et l'import accepte un second passage sans créer de doublons : une idée tardive s'ajoute en complétant le fichier et en le réimportant. Un formulaire deviendrait utile si des collègues saisissent des idées directement, ce qui n'est pas le cas ici.
+- **Suppression d'une idée.** Non retenue : l'action est irréversible pour une utilisatrice non technique, et une idée supprimée réapparaîtrait au prochain import du fichier. Le bon outil est plutôt un **statut « écartée »** (réversible, conservé dans l'historique), à prévoir dans la suite.
+
+**Avec une journée de plus** (par ordre de priorité)
+
+1. **Fiabilité et sécurité** : comptes et droits individuels à la place du mot de passe partagé ; limitation des essais de connexion ; sauvegarde automatique de la base.
+2. **Travail de Camille** : statut « écartée » et formulaire d'ajout ; historique des notes (qui a changé quoi, quand) ; pondération des critères réglable ; plusieurs challenges dans le même outil.
+3. **Qualité de l'analyse** : détection de doublons par le sens et plus seulement par les mots (la paire IDEA-017/018 en est la limite connue) ; [vrai modèle d'IA branché par `AI_API_KEY` avec repli sur la simulation, déjà prévu dans le code ; à reformuler selon l'état de la branche] ; traduction des idées en anglais (IDEA-021).
+4. **Restitution** : export PDF ou page imprimable de la shortlist ; tests de l'interface et des routes API.
+
+**Mes questions pour Camille**
+
 1. Les 4 critères pèsent-ils autant ? Quelle est la définition exacte de chaque note de 1 à 5 ?
 2. Quelles sont les priorités stratégiques d'Hexavia (pour juger l'« alignement ») ?
 3. Que faire d'un doublon : garder la meilleure version, fusionner les auteurs, avertir ?
@@ -129,3 +140,5 @@ npm run dev                  # http://localhost:3000
 6. Combien de temps conserver ces données personnelles ?
 7. Quel format d'envoi préfères-tu : CSV, PDF, page imprimable ?
 8. Faut-il traduire les idées rédigées en anglais (IDEA-021) ?
+9. Après le premier import, les idées seront-elles ajoutées une à une par des collègues, ou toujours par fichier ? (Cela décide si le formulaire d'ajout est nécessaire.)
+10. Faut-il pouvoir écarter une idée sans la perdre, par exemple pour garder la trace de ce qui a été refusé et pourquoi ?
