@@ -64,15 +64,22 @@ npm run dev                  # http://localhost:3000
 
 ## 3. Construction avec l'IA
 
-**Assistant** : Claude, en conversation guidée étape par étape. [À COMPLÉTER : préciser tout autre assistant utilisé, et pour quelles étapes.] Méthode : petites étapes, un commit par fonctionnalité, **tests écrits avant le code de nettoyage**, `CLAUDE.md` à la racine pour les consignes.
+**Assistants.** Claude a été mon assistant principal : cadrage, plan, code des modules, tests et revue. Gemini a produit une première version de la route de pré-notation par IA ; je l'ai relue, puis remplacée par une version restructurée (validation stricte de la réponse, délai maximum, repli sur la simulation).
 
-**Prompts les plus utiles** [À ADAPTER avec tes formulations exactes] :
-1. « Voici le projet reçu pour un stage… j'ai décidé d'utiliser Next.js et Supabase avec TypeScript… guide-moi tout au long du projet. Qu'en penses-tu et que me proposes-tu ? » (cadrage et plan en 7 étapes)
-2. « Je suis à l'aise avec Next.js et Supabase, mais pas avec TypeScript » (explications ciblées sur les types)
-3. « Pourquoi as-tu modifié ai-score ? Qu'as-tu changé ? Sois plus claire. » (je garde la main sur ce qui est produit)
-4. Prompt de passation (contexte, état, règles, étapes restantes) pour reprendre le travail avec une autre IA.
+**Méthode.** Travail par petites étapes, un commit par fonctionnalité, tests écrits avant le code de nettoyage des données, `CLAUDE.md` à la racine pour fixer les règles (pas de `any`, donnée manquante = `null`, logique pure dans `src/lib/`). Avant chaque commit : tests, `tsc`, lint et build.
 
-**Un moment où l'IA s'est trompée.** À l'import, Postgres refusait l'écriture (`42501 : violates row-level security policy`). L'assistant avait jugé que ma clé de 46 caractères était la clé secrète ; en lisant ses 10 premiers caractères (`sb_publish…`), j'ai vu que c'était la clé **publique**, que la RLS bloque justement. J'ai pris la clé secrète. Autres erreurs repérées en relecture : un réimport qui remettait `shortlisted` à `false`, une pré-note IA qui écrasait une note manuelle, et un type de retour qui laissait passer `null` (détecté par `tsc`, pas par les tests).
+**Les cinq usages les plus utiles**
+
+1. **Cadrage et faisabilité.** J'ai soumis le sujet complet en détaillant mon niveau (à l'aise avec Next.js et Supabase, débutant en TypeScript) et mes contraintes de temps, puis demandé un planning réaliste et une analyse de faisabilité. L'assistant a proposé un découpage en étapes alignées sur les sept critères d'évaluation, avec les choix à arbitrer et ce qu'il fallait laisser hors de la V1.
+2. **Tests pour chaque module de `src/lib/`.** Pour chaque fonction (budgets, dates, CSV, filtres, notation, doublons, IA simulée, export), j'ai demandé une suite de tests couvrant les cas limites, écrite avant ou avec le code. Le projet compte 95 tests.
+3. **Diagnostic des erreurs.** Je collais le résultat des tests, de `tsc` ou du build et je demandais d'identifier la cause et de me l'expliquer, pas seulement de corriger. C'est ainsi que j'ai compris, par exemple, qu'un test peut passer alors que le typage est faux, car Vitest ne vérifie pas les types.
+4. **Code ciblé sur des parties précises.** Interface de base (tableau, formulaire de notation), routes API (import, notes, pré-note, shortlist), accès par mot de passe. Je demandais le fichier complet, puis je relisais chaque modification avant de l'intégrer.
+5. **Notes de passation.** À chaque étape, un résumé structuré : contexte, état d'avancement, règles du projet, étapes restantes. Il permet de reprendre le travail sans perdre le fil, y compris avec un autre assistant.
+
+**Là où l'IA s'est trompée, et ce que j'ai fait.**
+- **Erreur d'appréciation sur une clé d'accès.** L'import était refusé par la base (`42501`, règle de sécurité par ligne). L'assistant avait estimé, d'après sa longueur, que ma clé était la clé secrète. En vérifiant moi-même son début (`sb_publish…`), j'ai constaté que c'était la clé publique, que la base bloque volontairement. J'ai utilisé la bonne clé, et le choix de la clé fait maintenant partie de la documentation.
+- **Fausses alertes.** Deux fois, l'assistant a signalé une page ou des routes manquantes en lisant une sortie tronquée. Après vérification sur la sortie complète, rien ne manquait. Depuis, je lui fournis la sortie entière avant de conclure.
+- **Comportements non voulus dans le code proposé.** À la relecture, j'ai repéré : un réimport du fichier qui remettait la sélection de la shortlist à zéro ; une pré-note de l'IA qui pouvait écraser une note saisie à la main ; un type qui acceptait une valeur absente là où une note était attendue (signalé par `tsc`, pas par les tests). Chacun a été corrigé et couvert par un test.
 
 ## 4. Fiabilisation
 
