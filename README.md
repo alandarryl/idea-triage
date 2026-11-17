@@ -7,10 +7,6 @@ Outil de tri des idées du challenge d'innovation Hexavia, pour Camille (INSKIP)
 - **Application en ligne** : https://idea-triage-sage.vercel.app/ (accès protégé par un mot de passe, communiqué dans l'e-mail de rendu)
 - **Dépôt** : https://github.com/alandarryl/idea-triage
 
-| Tableau et filtres | Notation d'une idée | Shortlist et export |
-|---|---|---|
-| ![Tableau](docs/screenshots/tableau.png) | ![Notation](docs/screenshots/notation.png) | ![Shortlist](docs/screenshots/shortlist.png) |
-
 <!-- [À COMPLÉTER] 3 captures dans docs/screenshots/ (supprimer ce commentaire ensuite) -->
 
 ## Lancer l'outil
